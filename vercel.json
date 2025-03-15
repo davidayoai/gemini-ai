@@ -2,22 +2,15 @@
     "version": 2,
     "builds": [
         {
-            "src": "server/**",
-            "use": "@vercel/node",
-            "config": {
-                "includeFiles": [
-                    "server/**",
-                    "vite.config.ts",
-                    "dist/**"
-                ]
-            }
+            "src": "dist/index.js",
+            "use": "@vercel/node"
         },
         {
-            "src": "client/**",
+            "src": "package.json",
             "use": "@vercel/static-build",
             "config": {
                 "distDir": "dist/public",
-                "buildCommand": "vite build --config vite.config.ts"
+                "buildCommand": "npm run build:client"
             }
         }
     ],
