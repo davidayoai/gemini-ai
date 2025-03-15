@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "target": "ES2020",
+        "module": "ESNext",
+        "outDir": "../dist",
+        "rootDir": "..", // Changed to project root
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "moduleResolution": "node",
+        "noEmitOnError": true
+    },
+    "include": [
+        "**/*.ts", // All .ts files in server/
+        "../vite.config.ts" // Include vite.config.ts from root
+    ],
+    "exclude": [
+        "../client", // Exclude client code
+        "../dist" // Exclude output directory
+    ]
+}

@@ -1,0 +1,38 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "server/**",
+            "use": "@vercel/node",
+            "config": {
+                "includeFiles": [
+                    "server/**",
+                    "vite.config.ts",
+                    "dist/**"
+                ]
+            }
+        },
+        {
+            "src": "client/**",
+            "use": "@vercel/static-build",
+            "config": {
+                "distDir": "dist/public",
+                "buildCommand": "vite build --config vite.config.ts"
+            }
+        }
+    ],
+    "routes": [
+        {
+            "src": "/api/(.*)",
+            "dest": "/dist/index.js"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "dist/public/index.html"
+        }
+    ],
+    "buildCommand": "npm run build",
+    "env": {
+        "GOOGLE_API_KEY": "AIzaSyDEPEgUlqSxhWtZ30lBoQYKIMX8U0fwZlA"
+    }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "Gemini Search",
+  "short_name": "Gemini",
+  "description": "A search engine powered by Google's Gemini Flash",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FCFCF9",
+  "theme_color": "#FCFCF9",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+} 
