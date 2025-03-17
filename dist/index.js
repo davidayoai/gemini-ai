@@ -8,10 +8,14 @@ var envPath = path.resolve(__dirname, "../.env");
 function setupEnvironment() {
   const result = dotenv.config({ path: envPath });
   if (result.error) {
-    throw new Error(`Failed to load .env file from ${envPath}: ${result.error.message}`);
+    throw new Error(
+      `Failed to load .env file from ${envPath}: ${result.error.message}`
+    );
   }
   if (!process.env.GOOGLE_API_KEY) {
-    throw new Error("GOOGLE_API_KEY environment variable must be set in .env file");
+    throw new Error(
+      "GOOGLE_API_KEY environment variable must be set in .env file"
+    );
   }
   return {
     GOOGLE_API_KEY: process.env.GOOGLE_API_KEY,
@@ -234,7 +238,6 @@ async function setupVite(app2, server) {
     configFile: false,
     customLogger: {
       ...viteLogger,
-      // Spread the default logger to include all required methods
       error: (msg, options) => {
         if (msg.includes("[TypeScript] Found 0 errors. Watching for file changes")) {
           log("no errors found", "tsc");
@@ -250,18 +253,19 @@ async function setupVite(app2, server) {
         }
       }
     },
-    // Type assertion to ensure it matches Logger interface
     server: {
       middlewareMode: true,
       hmr: { server }
     },
-    appType: "custom"
+    appType: "custom",
+    root: path3.resolve(__dirname3, "../client")
+    // Ensure correct root
   });
   app2.use(vite.middlewares);
   app2.use("*", async (req, res, next) => {
     const url = req.originalUrl;
     try {
-      const clientTemplate = path3.resolve(__dirname3, "..", "client", "index.html");
+      const clientTemplate = path3.resolve(__dirname3, "../client/index.html");
       const template = await fs.promises.readFile(clientTemplate, "utf-8");
       const page = await vite.transformIndexHtml(url, template);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
@@ -272,7 +276,7 @@ async function setupVite(app2, server) {
   });
 }
 function serveStatic(app2) {
-  const distPath = path3.resolve(__dirname3, "public");
+  const distPath = path3.resolve(__dirname3, "../dist/public");
   if (!fs.existsSync(distPath)) {
     throw new Error(`Could not find the build directory: ${distPath}, make sure to build the client first`);
   }
