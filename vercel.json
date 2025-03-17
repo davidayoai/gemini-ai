@@ -10,14 +10,21 @@
             "use": "@vercel/static-build",
             "config": {
                 "distDir": "dist/public",
-                "buildCommand": "npm run build:client"
+                "buildCommand": "npm run build"
             }
         }
     ],
     "routes": [
         {
+            "src": "/api/(.*)",
+            "dest": "/dist/index.js"
+        },
+        {
             "src": "/(.*)",
             "dest": "/dist/public/index.html"
         }
-    ]
+    ],
+    "env": {
+        "NODE_ENV": "production"
+    }
 }
