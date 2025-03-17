@@ -2,7 +2,8 @@
     "version": 2,
     "builds": [
         {
-            "src": "dist/index.js"
+            "src": "dist/index.js",
+            "use": "@vercel/node"
         },
         {
             "src": "package.json",
@@ -20,11 +21,9 @@
         },
         {
             "src": "/(.*)",
-            "dest": "dist/public/index.html"
+            "dest": "/dist/public/index.html"
         }
     ],
-    "buildCommand": "npm run build",
-    "installCommand": "apt-get update && apt-get install -y cmake && npm install",
     "env": {
         "GOOGLE_API_KEY": "AIzaSyDEPEgUlqSxhWtZ30lBoQYKIMX8U0fwZlA"
     }
