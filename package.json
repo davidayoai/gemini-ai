@@ -4,13 +4,12 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
+    "dev": "tsx server/index.js",
     "build:server": "tsc -p server/tsconfig.json",
-    "build:client": "vite build --config vite.config.ts",
-    "build": "npm run build:server && npm run build:client",
-    "start": "node dist/index.js",
-    "dev": "tsx server/index.ts",
+    "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+    "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc",
-    "clean": "rimraf dist"
+    "db:push": "drizzle-kit push"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
@@ -57,6 +56,7 @@
     "express": "^4.21.2",
     "express-session": "^1.18.1",
     "framer-motion": "^11.13.1",
+    "heroku": "^8.7.1",
     "input-otp": "^1.2.4",
     "lucide-react": "^0.453.0",
     "marked": "^15.0.4",
