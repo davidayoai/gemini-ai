@@ -1,0 +1,11 @@
+{
+    "extends": "../tsconfig.json", // Extend the base tsconfig
+    "compilerOptions": {
+        "module": "ESNext", // Use ES modules for client-side code
+        "outDir": "./dist", // Specify the output directory for client files
+        "rootDir": "./" // Root directory for client code
+    },
+    "include": [
+        "client/**/*" // Include all client files only
+    ]
+}
