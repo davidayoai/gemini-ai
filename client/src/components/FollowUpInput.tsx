@@ -36,7 +36,7 @@ export function FollowUpInput({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Continue message"
+          placeholder="Type your question or message here"
           className={cn(
             "transition-all duration-200",
             "focus-visible:ring-1 focus-visible:ring-primary",

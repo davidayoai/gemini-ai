@@ -48,7 +48,7 @@ export function SearchInput({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Message Gemini 2.0"
+          placeholder="Ask Anything"
           className={cn(
             "pl-10 pr-4 py-2 transition-all duration-200 resize-none",
             large && "h-12 text-lg rounded-lg",

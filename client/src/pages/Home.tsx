@@ -38,7 +38,7 @@ export function Home() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Message Gemini 2.0"
+              placeholder="Ask Anything"
               className="w-full px-5 py-3 text-lg bg-transparent border-none outline-none resize-none focus:ring-0 text-gray-900 dark:text-white rounded-2xl"
               style={{ fontFamily: 'Inter, sans-serif' }}
               rows={1}

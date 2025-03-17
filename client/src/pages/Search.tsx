@@ -87,7 +87,7 @@ export function Search() {
           }
           return result;
         }
-        throw new Error('Follow-up failed');
+        throw new Error('Follow-up failed'); 
       }
 
       const result = await response.json();
