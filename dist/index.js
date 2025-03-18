@@ -1,3 +1,12 @@
+// server/index.ts
+import "dotenv/config";
+import express2 from "express";
+
+// server/routes.ts
+import { createServer } from "http";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { marked } from "marked";
+
 // server/env.ts
 import dotenv from "dotenv";
 import path from "path";
@@ -19,19 +28,11 @@ function setupEnvironment() {
   }
   return {
     GOOGLE_API_KEY: process.env.GOOGLE_API_KEY,
-    NODE_ENV: process.env.NODE_ENV || "development"
+    NODE_ENV: process.env.NODE_ENV
   };
 }
 
-// server/index.ts
-import path4 from "path";
-import { fileURLToPath as fileURLToPath4 } from "url";
-import express2 from "express";
-
 // server/routes.ts
-import { createServer } from "http";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { marked } from "marked";
 var env = setupEnvironment();
 var genAI = new GoogleGenerativeAI(env.GOOGLE_API_KEY);
 var model = genAI.getGenerativeModel({
@@ -199,6 +200,7 @@ import { fileURLToPath as fileURLToPath2 } from "url";
 var __filename2 = fileURLToPath2(import.meta.url);
 var __dirname2 = dirname(__filename2);
 var vite_config_default = defineConfig({
+  assetsInclude: ["**/*.html"],
   plugins: [react(), runtimeErrorOverlay(), themePlugin()],
   resolve: {
     alias: {
@@ -287,16 +289,12 @@ function serveStatic(app2) {
 }
 
 // server/index.ts
-var env2 = setupEnvironment();
-var __filename4 = fileURLToPath4(import.meta.url);
-var __dirname4 = path4.dirname(__filename4);
 var app = express2();
 app.use(express2.json());
 app.use(express2.urlencoded({ extended: false }));
 app.use((req, res, next) => {
   const start = Date.now();
-  const path5 = req.path;
-  let capturedJsonResponse = void 0;
+  let capturedJsonResponse;
   const originalResJson = res.json;
   res.json = function(bodyJson, ...args) {
     capturedJsonResponse = bodyJson;
@@ -304,14 +302,12 @@ app.use((req, res, next) => {
   };
   res.on("finish", () => {
     const duration = Date.now() - start;
-    if (path5.startsWith("/api")) {
-      let logLine = `${req.method} ${path5} ${res.statusCode} in ${duration}ms`;
+    if (req.path.startsWith("/api")) {
+      let logLine = `${req.method} ${req.path} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "\u2026";
-      }
+      if (logLine.length > 80) logLine = logLine.slice(0, 79) + "\u2026";
       log(logLine);
     }
   });
@@ -320,18 +316,17 @@ app.use((req, res, next) => {
 (async () => {
   const server = registerRoutes(app);
   app.use((err, _req, res, _next) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-    res.status(status).json({ message });
-    throw err;
+    res.status(err.status || 500).json({ message: err.message || "Internal Server Error" });
   });
-  if (app.get("env") === "development") {
+  const PORT = process.env.PORT || 3e3;
+  if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
-  const PORT = 3e3;
-  server.listen(PORT, () => {
-    log(`serving on port ${PORT}`);
-  });
+  server.listen(PORT, () => log(`Server running on port ${PORT}`));
 })();
+var index_default = app;
+export {
+  index_default as default
+};

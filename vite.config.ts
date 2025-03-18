@@ -9,6 +9,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export default defineConfig({
+  assetsInclude: ["**/*.html"],
+
   plugins: [react(), runtimeErrorOverlay(), themePlugin()],
   resolve: {
     alias: {
