@@ -2,7 +2,6 @@ import { createServer } from "http";
 import { GoogleGenerativeAI, } from "@google/generative-ai";
 import { marked } from "marked";
 import { setupEnvironment } from "./env";
-import { Application, Request, Response } from "express";
 const env = setupEnvironment();
 const genAI = new GoogleGenerativeAI(env.GOOGLE_API_KEY);
 const model = genAI.getGenerativeModel({
@@ -17,27 +16,7 @@ const model = genAI.getGenerativeModel({
 // Store chat sessions in memory
 const chatSessions = new Map();
 // Format raw text into proper markdown
-interface GroundingChunk {
-    web?: {
-        uri?: string;
-        title?: string;
-    };
-}
-
-interface GroundingSupport {
-    groundingChunkIndices: number[];
-    segment: {
-        text: string;
-    };
-}
-
-interface Source {
-    title: string;
-    url: string;
-    snippet: string;
-}
-
-async function formatResponseToMarkdown(text: string): Promise<string> {
+async function formatResponseToMarkdown(text) {
     // Ensure we have a string to work with
     const resolvedText = await Promise.resolve(text);
     // First, ensure consistent newlines
@@ -69,36 +48,11 @@ async function formatResponseToMarkdown(text: string): Promise<string> {
     // Convert markdown to HTML using marked
     return marked.parse(formatted);
 }
-interface FollowUpRequestBody {
-    sessionId: string;
-    query: string;
-}
-
-interface Source {
-    title: string;
-    url: string;
-    snippet: string;
-}
-
-interface GroundingChunk {
-    web?: {
-        uri?: string;
-        title?: string;
-    };
-}
-
-interface GroundingSupport {
-    groundingChunkIndices: number[];
-    segment: {
-        text: string;
-    };
-}
-
-export function registerRoutes(app: Application): import("http").Server {
+export function registerRoutes(app) {
     // Search endpoint - creates a new chat session
-    app.get("/api/search", async (req: Request, res: Response) => {
+    app.get("/api/search", async (req, res) => {
         try {
-            const query = req.query.q as string;
+            const query = req.query.q;
             if (!query) {
                 return res.status(400).json({
                     message: "Query parameter 'q' is required",
@@ -125,20 +79,20 @@ export function registerRoutes(app: Application): import("http").Server {
             // Format the response text to proper markdown/HTML
             const formattedText = await formatResponseToMarkdown(text);
             // Extract sources from grounding metadata
-            const sourceMap = new Map<string, Source>();
+            const sourceMap = new Map();
             // Get grounding metadata from response
             const metadata = response.candidates?.[0]?.groundingMetadata;
             if (metadata) {
                 const chunks = metadata.groundingChunks || [];
                 const supports = metadata.groundingSupports || [];
-                chunks.forEach((chunk: GroundingChunk, index: number) => {
+                chunks.forEach((chunk, index) => {
                     if (chunk.web?.uri && chunk.web?.title) {
                         const url = chunk.web.uri;
                         if (!sourceMap.has(url)) {
                             // Find snippets that reference this chunk
                             const snippets = supports
-                                .filter((support: GroundingSupport) => support.groundingChunkIndices.includes(index))
-                                .map((support: GroundingSupport) => support.segment.text)
+                                .filter((support) => support.groundingChunkIndices.includes(index))
+                                .map((support) => support.segment.text)
                                 .join(" ");
                             sourceMap.set(url, {
                                 title: chunk.web.title,
@@ -166,9 +120,8 @@ export function registerRoutes(app: Application): import("http").Server {
             });
         }
     });
-
     // Follow-up endpoint - continues existing chat session
-    app.post("/api/follow-up", async (req: Request<{}, {}, FollowUpRequestBody>, res: Response) => {
+    app.post("/api/follow-up", async (req, res) => {
         try {
             const { sessionId, query } = req.body;
             if (!sessionId || !query) {
@@ -194,20 +147,20 @@ export function registerRoutes(app: Application): import("http").Server {
             // Format the response text to proper markdown/HTML
             const formattedText = await formatResponseToMarkdown(text);
             // Extract sources from grounding metadata
-            const sourceMap = new Map<string, Source>();
+            const sourceMap = new Map();
             // Get grounding metadata from response
             const metadata = response.candidates?.[0]?.groundingMetadata;
             if (metadata) {
                 const chunks = metadata.groundingChunks || [];
                 const supports = metadata.groundingSupports || [];
-                chunks.forEach((chunk: GroundingChunk, index: number) => {
+                chunks.forEach((chunk, index) => {
                     if (chunk.web?.uri && chunk.web?.title) {
                         const url = chunk.web.uri;
                         if (!sourceMap.has(url)) {
                             // Find snippets that reference this chunk
                             const snippets = supports
-                                .filter((support: GroundingSupport) => support.groundingChunkIndices.includes(index))
-                                .map((support: GroundingSupport) => support.segment.text)
+                                .filter((support) => support.groundingChunkIndices.includes(index))
+                                .map((support) => support.segment.text)
                                 .join(" ");
                             sourceMap.set(url, {
                                 title: chunk.web.title,
@@ -232,7 +185,6 @@ export function registerRoutes(app: Application): import("http").Server {
             });
         }
     });
-
     const httpServer = createServer(app);
     return httpServer;
 }
