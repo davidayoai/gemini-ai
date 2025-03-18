@@ -2,21 +2,27 @@
     "version": 2,
     "builds": [
         {
+            "src": "dist/index.js",
+            "use": "@vercel/node"
+        },
+        {
             "src": "package.json",
             "use": "@vercel/static-build",
             "config": {
-                "distDir": "client/public"
+                "distDir": "dist/public",
+                "buildCommand": "npm run build:client"
             }
         }
     ],
     "routes": [
         {
             "src": "/api/(.*)",
-            "dest": "/api/index.js"
+            "dest": "/dist/index.js"
         },
         {
             "src": "/(.*)",
-            "dest": "/index.html"
+            "dest": "dist/public/index.html"
         }
-    ]
+    ],
+    "installCommand": "apt-get update && apt-get install -y cmake && npm install"
 }
