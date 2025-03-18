@@ -175,7 +175,7 @@ function registerRoutes(app2) {
     } catch (error) {
       console.error("Follow-up error:", error);
       res.status(500).json({
-        message: error.message || "An error occurred while processing your follow-up question"
+        message: (error instanceof Error ? error.message : "Unknown error") || "An error occurred while processing your follow-up question"
       });
     }
   });
@@ -200,7 +200,6 @@ import { fileURLToPath as fileURLToPath2 } from "url";
 var __filename2 = fileURLToPath2(import.meta.url);
 var __dirname2 = dirname(__filename2);
 var vite_config_default = defineConfig({
-  assetsInclude: ["**/*.html"],
   plugins: [react(), runtimeErrorOverlay(), themePlugin()],
   resolve: {
     alias: {

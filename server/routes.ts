@@ -16,7 +16,7 @@ const model = genAI.getGenerativeModel({
 // Store chat sessions in memory
 const chatSessions = new Map();
 // Format raw text into proper markdown
-async function formatResponseToMarkdown(text) {
+async function formatResponseToMarkdown(text: string) {
     // Ensure we have a string to work with
     const resolvedText = await Promise.resolve(text);
     // First, ensure consistent newlines
@@ -180,7 +180,7 @@ export function registerRoutes(app) {
         catch (error) {
             console.error("Follow-up error:", error);
             res.status(500).json({
-                message: error.message ||
+                message: (error instanceof Error ? error.message : "Unknown error") ||
                     "An error occurred while processing your follow-up question",
             });
         }
