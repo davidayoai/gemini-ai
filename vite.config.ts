@@ -31,6 +31,6 @@ export default defineConfig({
     },
   },
   esbuild: {
-    jsxInject: `import React from 'react'`, // Ensures JSX works without explicit imports
+    jsxInject: undefined, // Prevents auto-injecting React if manually imported
   },
 });
