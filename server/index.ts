@@ -1,7 +1,19 @@
-import "dotenv/config"; // ✅ Automatically loads .env variables
-import express, { Request, Response, NextFunction } from "express";
+import { setupEnvironment } from "./env";
+import path from "path";
+import { fileURLToPath } from "url";
+import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+
+// Setup environment variables first
+const env = setupEnvironment();
+console.log("\n--- Environment Setup Debug ---");
+console.log("Environment variables loaded:", env);
+console.log("--- End Debug ---\n");
+
+// Get the directory name properly with ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(express.json());
@@ -9,7 +21,8 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use((req, res, next) => {
   const start = Date.now();
-  let capturedJsonResponse: Record<string, any> | undefined;
+  const path = req.path;
+  let capturedJsonResponse: Record<string, any> | undefined = undefined;
 
   const originalResJson = res.json;
   res.json = function (bodyJson, ...args) {
@@ -19,12 +32,16 @@ app.use((req, res, next) => {
 
   res.on("finish", () => {
     const duration = Date.now() - start;
-    if (req.path.startsWith("/api")) {
-      let logLine = `${req.method} ${req.path} ${res.statusCode} in ${duration}ms`;
+    if (path.startsWith("/api")) {
+      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
-      if (logLine.length > 80) logLine = logLine.slice(0, 79) + "…";
+
+      if (logLine.length > 80) {
+        logLine = logLine.slice(0, 79) + "…";
+      }
+
       log(logLine);
     }
   });
@@ -36,18 +53,26 @@ app.use((req, res, next) => {
   const server = registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    res.status(err.status || 500).json({ message: err.message || "Internal Server Error" });
+    const status = err.status || err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
+
+    res.status(status).json({ message });
+    throw err;
   });
 
-  const PORT = process.env.PORT || 3000;
-
-  if (process.env.NODE_ENV === "development") {
+  // importantly only setup vite in development and after
+  // setting up all the other routes so the catch-all route
+  // doesn't interfere with the other routes
+  if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
 
-  server.listen(PORT, () => log(`Server running on port ${PORT}`));
+  // ALWAYS serve the app on port 3000
+  // this serves both the API and the client
+  const PORT = 3000;
+  server.listen(PORT, "0.0.0.0", () => {
+    log(`serving on port ${PORT}`);
+  });
 })();
-
-export default app; // ✅ Required for Vercel API routes
