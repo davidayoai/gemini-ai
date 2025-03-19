@@ -4,7 +4,7 @@ A Perplexity-style search engine powered by Google's Gemini 2.0 Flash model with
 
 Created by [@Davidayo](https://www.davidayo.com/)
 
-<!-- ![Kapture 2025-02-13 at 10 35 14](https://github.com/user-attachments/assets/2302898e-03ae-40a6-a16c-301d6b91c5af) -->
+![Kapture 2025-02-13 at 10 35 14](/davidayo-ai.mov)
 
 
 ## Features
