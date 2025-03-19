@@ -337,7 +337,7 @@ app.use(express2.json());
 app.use(express2.urlencoded({ extended: false }));
 app.use((req, res, next) => {
   const start = Date.now();
-  const path5 = req.path;
+  const requestPath = req.path;
   let capturedJsonResponse = void 0;
   const originalResJson = res.json;
   res.json = function(bodyJson, ...args) {
@@ -346,13 +346,13 @@ app.use((req, res, next) => {
   };
   res.on("finish", () => {
     const duration = Date.now() - start;
-    if (path5.startsWith("/api")) {
-      let logLine = `${req.method} ${path5} ${res.statusCode} in ${duration}ms`;
+    if (requestPath.startsWith("/api")) {
+      let logLine = `${req.method} ${requestPath} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "\u2026";
+      if (logLine.length > 150) {
+        logLine = logLine.slice(0, 149) + "\u2026";
       }
       log(logLine);
     }
@@ -360,20 +360,31 @@ app.use((req, res, next) => {
   next();
 });
 (async () => {
-  const server = registerRoutes(app);
-  app.use((err, _req, res, _next) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-    res.status(status).json({ message });
-    throw err;
-  });
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
+  try {
+    console.log("\u{1F680} Registering API Routes...");
+    registerRoutes(app);
+    console.log("\u2705 Routes registered successfully.");
+    app.use((err, _req, res, _next) => {
+      console.error("\u274C API ERROR:", err);
+      res.status(err.status || 500).json({
+        error: err.message || "Internal Server Error",
+        stack: process.env.NODE_ENV === "development" ? err.stack : void 0
+      });
+    });
+    if (app.get("env") === "development") {
+      console.log("\u{1F6E0} Setting up Vite (Development Mode)...");
+      await setupVite(app);
+      console.log("\u2705 Vite setup complete.");
+    } else {
+      console.log("\u{1F4E6} Serving Static Files...");
+      serveStatic(app);
+    }
+    const PORT = 3e3;
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`\u2705 Server running on http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error("\u{1F525} Server Initialization Failed:", error);
+    process.exit(1);
   }
-  const PORT = 3e3;
-  server.listen(PORT, "0.0.0.0", () => {
-    log(`serving on port ${PORT}`);
-  });
 })();
