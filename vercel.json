@@ -23,6 +23,5 @@
             "src": "/(.*)",
             "dest": "dist/public/index.html"
         }
-    ],
-    "installCommand": "apt-get update && apt-get install -y cmake && npm install"
+    ]
 }
