@@ -107,96 +107,34 @@ export function registerRoutes(app: Express): Server {
     app.get("/api/search", async (req, res) => {
         try {
             const query = req.query.q as string;
+            if (!query) throw new Error("Missing 'q' query parameter");
 
-            if (!query) {
-                return res.status(400).json({
-                    message: "Query parameter 'q' is required",
-                });
-            }
+            console.log("Received search query:", query);
 
-            // Create a new chat session with search capability
+            // Start a new chat session
             const chat = model.startChat({
-                tools: [
-                    {
-                        // @ts-ignore - google_search is a valid tool but not typed in the SDK yet
-                        google_search: {},
-                    },
-                ],
+                tools: [{ google_search: {} }],
             });
 
-            // Generate content with search tool
+            console.log("Chat session created. Sending message...");
             const result = await chat.sendMessage(query);
+
+            if (!result) throw new Error("No response from chat session");
+
             const response = await result.response;
-            console.log(
-                "Raw Google API Response:",
-                JSON.stringify(
-                    {
-                        text: response.text(),
-                        candidates: response.candidates,
-                        groundingMetadata: response.candidates?.[0]?.groundingMetadata,
-                    },
-                    null,
-                    2
-                )
-            );
-            const text = response.text();
+            if (!response) throw new Error("No response received");
 
-            // Format the response text to proper markdown/HTML
-            const formattedText = await formatResponseToMarkdown(text);
+            console.log("API Response:", response.text());
 
-            // Extract sources from grounding metadata
-            const sourceMap = new Map<
-                string,
-                { title: string; url: string; snippet: string }
-            >();
+            const formattedText = await formatResponseToMarkdown(response.text());
 
-            // Get grounding metadata from response
-            const metadata = response.candidates?.[0]?.groundingMetadata as any;
-            if (metadata) {
-                const chunks = metadata.groundingChunks || [];
-                const supports = metadata.groundingSupports || [];
-
-                chunks.forEach((chunk: any, index: number) => {
-                    if (chunk.web?.uri && chunk.web?.title) {
-                        const url = chunk.web.uri;
-                        if (!sourceMap.has(url)) {
-                            // Find snippets that reference this chunk
-                            const snippets = supports
-                                .filter((support: any) =>
-                                    support.groundingChunkIndices.includes(index)
-                                )
-                                .map((support: any) => support.segment.text)
-                                .join(" ");
-
-                            sourceMap.set(url, {
-                                title: chunk.web.title,
-                                url: url,
-                                snippet: snippets || "",
-                            });
-                        }
-                    }
-                });
-            }
-
-            const sources = Array.from(sourceMap.values());
-
-            // Generate a session ID and store the chat
-            const sessionId = Math.random().toString(36).substring(7);
-            chatSessions.set(sessionId, chat);
-
-            res.json({
-                sessionId,
-                summary: formattedText,
-                sources,
-            });
-        } catch (error: any) {
-            console.error("Search error:", error);
-            res.status(500).json({
-                message:
-                    error.message || "An error occurred while processing your search",
-            });
+            res.json({ summary: formattedText });
+        } catch (error) {
+            console.error("Search API Error:", error);
+            res.status(500).json({ message: error.message });
         }
     });
+
 
     // Follow-up endpoint - continues existing chat session
     app.post("/api/follow-up", async (req, res) => {
