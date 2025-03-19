@@ -5,13 +5,13 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
-// Setup environment variables first
+// Load environment variables
 const env = setupEnvironment();
 console.log("\n--- Environment Setup Debug ---");
 console.log("Environment variables loaded:", env);
 console.log("--- End Debug ---\n");
 
-// Get the directory name properly with ES modules
+// Get correct __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -19,9 +19,10 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Middleware: Request Logger & Response Capture
 app.use((req, res, next) => {
   const start = Date.now();
-  const path = req.path;
+  const requestPath = req.path;
   let capturedJsonResponse: Record<string, any> | undefined = undefined;
 
   const originalResJson = res.json;
@@ -32,14 +33,14 @@ app.use((req, res, next) => {
 
   res.on("finish", () => {
     const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
+    if (requestPath.startsWith("/api")) {
+      let logLine = `${req.method} ${requestPath} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
 
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
+      if (logLine.length > 150) {
+        logLine = logLine.slice(0, 149) + "…";
       }
 
       log(logLine);
@@ -49,30 +50,39 @@ app.use((req, res, next) => {
   next();
 });
 
+// Async function to initialize the server
 (async () => {
-  const server = registerRoutes(app);
+  try {
+    console.log("🚀 Registering API Routes...");
+    registerRoutes(app);
+    console.log("✅ Routes registered successfully.");
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+    // Global Error Handling Middleware
+    app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+      console.error("❌ API ERROR:", err);
+      res.status(err.status || 500).json({
+        error: err.message || "Internal Server Error",
+        stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
+      });
+    });
 
-    res.status(status).json({ message });
-    throw err;
-  });
+    if (app.get("env") === "development") {
+      console.log("🛠 Setting up Vite (Development Mode)...");
+      await setupVite(app);
+      console.log("✅ Vite setup complete.");
+    } else {
+      console.log("📦 Serving Static Files...");
+      serveStatic(app);
+    }
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
+    // Start the Server on Port 3000
+    const PORT = 3000;
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`✅ Server running on http://localhost:${PORT}`);
+    });
+
+  } catch (error) {
+    console.error("🔥 Server Initialization Failed:", error);
+    process.exit(1); // Ensure process exits if there's a fatal error
   }
-
-  // ALWAYS serve the app on port 3000
-  // this serves both the API and the client
-  const PORT = 3000;
-  server.listen(PORT, "0.0.0.0", () => {
-    log(`serving on port ${PORT}`);
-  });
 })();
