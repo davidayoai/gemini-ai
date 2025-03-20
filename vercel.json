@@ -22,5 +22,8 @@
             "src": "/(.*)",
             "dest": "dist/public/index.html"
         }
-    ]
+    ],
+    "engines": {
+        "node": "22.14.0"
+    }
 }
