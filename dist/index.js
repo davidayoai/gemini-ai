@@ -76,69 +76,22 @@ function registerRoutes(app2) {
   app2.get("/api/search", async (req, res) => {
     try {
       const query = req.query.q;
-      if (!query) {
-        return res.status(400).json({
-          message: "Query parameter 'q' is required"
-        });
-      }
+      if (!query) throw new Error("Missing 'q' query parameter");
+      console.log("Received search query:", query);
       const chat = model.startChat({
-        tools: [
-          {
-            // @ts-ignore - google_search is a valid tool but not typed in the SDK yet
-            google_search: {}
-          }
-        ]
+        tools: [{ google_search: {} }]
       });
+      console.log("Chat session created. Sending message...");
       const result = await chat.sendMessage(query);
+      if (!result) throw new Error("No response from chat session");
       const response = await result.response;
-      console.log(
-        "Raw Google API Response:",
-        JSON.stringify(
-          {
-            text: response.text(),
-            candidates: response.candidates,
-            groundingMetadata: response.candidates?.[0]?.groundingMetadata
-          },
-          null,
-          2
-        )
-      );
-      const text = response.text();
-      const formattedText = await formatResponseToMarkdown(text);
-      const sourceMap = /* @__PURE__ */ new Map();
-      const metadata = response.candidates?.[0]?.groundingMetadata;
-      if (metadata) {
-        const chunks = metadata.groundingChunks || [];
-        const supports = metadata.groundingSupports || [];
-        chunks.forEach((chunk, index) => {
-          if (chunk.web?.uri && chunk.web?.title) {
-            const url = chunk.web.uri;
-            if (!sourceMap.has(url)) {
-              const snippets = supports.filter(
-                (support) => support.groundingChunkIndices.includes(index)
-              ).map((support) => support.segment.text).join(" ");
-              sourceMap.set(url, {
-                title: chunk.web.title,
-                url,
-                snippet: snippets || ""
-              });
-            }
-          }
-        });
-      }
-      const sources = Array.from(sourceMap.values());
-      const sessionId = Math.random().toString(36).substring(7);
-      chatSessions.set(sessionId, chat);
-      res.json({
-        sessionId,
-        summary: formattedText,
-        sources
-      });
+      if (!response) throw new Error("No response received");
+      console.log("API Response:", response.text());
+      const formattedText = await formatResponseToMarkdown(response.text());
+      res.json({ summary: formattedText });
     } catch (error) {
-      console.error("Search error:", error);
-      res.status(500).json({
-        message: error.message || "An error occurred while processing your search"
-      });
+      console.error("Search API Error:", error);
+      res.status(500).json({ message: error.message });
     }
   });
   app2.post("/api/follow-up", async (req, res) => {

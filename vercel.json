@@ -7,17 +7,13 @@
         },
         {
             "src": "package.json",
-            "use": "@vercel/static-build",
-            "config": {
-                "distDir": "dist/public",
-                "buildCommand": "npm run build:client"
-            }
+            "use": "@vercel/static-build"
         }
     ],
     "routes": [
         {
             "src": "/api/(.*)",
-            "dest": "/dist/index.js"
+            "dest": "/server/index.ts"
         },
         {
             "src": "/(.*)",
