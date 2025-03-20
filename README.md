@@ -83,7 +83,7 @@ Created by [@Davidayo](https://www.davidayo.com/)
 
 ## License
 
-MIT License - feel free to use this code for your own projects!
+MIT License - Never use it. @copyrights. 
 
 ## Acknowledgments
 
