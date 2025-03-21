@@ -2,7 +2,7 @@ import { setupEnvironment } from "./env";
 import path from "path";
 import { fileURLToPath } from "url";
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
+import { registerRoutes } from "./routes";  // Ensure the path is correct
 import { setupVite, serveStatic, log } from "./vite";
 
 // Load environment variables
@@ -54,7 +54,7 @@ app.use((req, res, next) => {
 (async () => {
   try {
     console.log("🚀 Registering API Routes...");
-    registerRoutes(app);
+    registerRoutes();
     console.log("✅ Routes registered successfully.");
 
     // Global Error Handling Middleware

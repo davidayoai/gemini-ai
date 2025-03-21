@@ -19,7 +19,7 @@ function setupEnvironment() {
   }
   return {
     GOOGLE_API_KEY: process.env.GOOGLE_API_KEY || "AIzaSyDEPEgUlqSxhWtZ30lBoQYKIMX8U0fwZlA",
-    NODE_ENV: process.env.NODE_ENV || "production"
+    NODE_ENV: process.env.NODE_ENV || "development"
   };
 }
 
@@ -164,7 +164,7 @@ function registerRoutes(app2) {
 // server/vite.ts
 import express from "express";
 import fs from "fs";
-import path3, { dirname } from "path";
+import path3, { dirname as dirname2 } from "path";
 import { fileURLToPath as fileURLToPath3 } from "url";
 import { createServer as createViteServer, createLogger } from "vite";
 
@@ -172,49 +172,36 @@ import { createServer as createViteServer, createLogger } from "vite";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import themePlugin from "@replit/vite-plugin-shadcn-theme-json";
-import path2 from "path";
+import path2, { dirname } from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 import { fileURLToPath as fileURLToPath2 } from "url";
 var __filename2 = fileURLToPath2(import.meta.url);
-var __dirname2 = path2.dirname(__filename2);
+var __dirname2 = dirname(__filename2);
 var vite_config_default = defineConfig({
+  assetsInclude: ["**/*.html"],
   plugins: [react(), runtimeErrorOverlay(), themePlugin()],
   resolve: {
     alias: {
       "@db": path2.resolve(__dirname2, "db"),
-      "@": path2.resolve(__dirname2, "client/src")
-      // Ensure alias is correct
+      "@": path2.resolve(__dirname2, "client", "src")
     }
   },
   root: path2.resolve(__dirname2, "client"),
-  // Ensures Vite serves from the correct folder
   build: {
-    outDir: path2.resolve(__dirname2, "client/dist"),
-    // ✅ Store the build in client/dist
-    emptyOutDir: true,
-    target: "esnext"
+    outDir: path2.resolve(__dirname2, "dist/public"),
+    emptyOutDir: true
   },
   server: {
     port: 3e3,
-    // ✅ Standard Vite React port
-    strictPort: true,
-    host: "localhost",
-    // Prevents external access
-    watch: {
-      usePolling: true
-      // Fix for file-watching issues
-    },
-    open: true
-    // Auto-opens the browser on start
-  },
-  esbuild: {
-    jsxInject: void 0
+    // Specify a development server port if needed
+    host: true
+    // Allows access from network devices (optional)
   }
 });
 
 // server/vite.ts
 var __filename3 = fileURLToPath3(import.meta.url);
-var __dirname3 = dirname(__filename3);
+var __dirname3 = dirname2(__filename3);
 var viteLogger = createLogger();
 function log(message, source = "express") {
   const formattedTime = (/* @__PURE__ */ new Date()).toLocaleTimeString("en-US", {
@@ -316,7 +303,7 @@ app.use((req, res, next) => {
 (async () => {
   try {
     console.log("\u{1F680} Registering API Routes...");
-    registerRoutes(app);
+    registerRoutes();
     console.log("\u2705 Routes registered successfully.");
     app.use((err, _req, res, _next) => {
       console.error("\u274C API ERROR:", err);
