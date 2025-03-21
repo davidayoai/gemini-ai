@@ -1,3 +1,6 @@
+// server/index.ts
+import express from "express";
+
 // server/env.ts
 import dotenv from "dotenv";
 import path from "path";
@@ -22,11 +25,6 @@ function setupEnvironment() {
     NODE_ENV: process.env.NODE_ENV || "production"
   };
 }
-
-// server/index.ts
-import path4 from "path";
-import { fileURLToPath as fileURLToPath4 } from "url";
-import express2 from "express";
 
 // server/routes.ts
 import { createServer } from "http";
@@ -187,165 +185,21 @@ function registerRoutes(app2) {
   return httpServer;
 }
 
-// server/vite.ts
-import express from "express";
-import fs from "fs";
-import path3, { dirname as dirname2 } from "path";
-import { fileURLToPath as fileURLToPath3 } from "url";
-import { createServer as createViteServer, createLogger } from "vite";
-
-// vite.config.ts
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import themePlugin from "@replit/vite-plugin-shadcn-theme-json";
-import path2, { dirname } from "path";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
-import { fileURLToPath as fileURLToPath2 } from "url";
-var __filename2 = fileURLToPath2(import.meta.url);
-var __dirname2 = dirname(__filename2);
-var vite_config_default = defineConfig({
-  plugins: [react(), runtimeErrorOverlay(), themePlugin()],
-  resolve: {
-    alias: {
-      "@db": path2.resolve(__dirname2, "db"),
-      "@": path2.resolve(__dirname2, "client", "src")
-    }
-  },
-  root: path2.resolve(__dirname2, "client"),
-  build: {
-    outDir: path2.resolve(__dirname2, "dist/public"),
-    emptyOutDir: true
-  }
-});
-
-// server/vite.ts
-var __filename3 = fileURLToPath3(import.meta.url);
-var __dirname3 = dirname2(__filename3);
-var viteLogger = createLogger();
-function log(message, source = "express") {
-  const formattedTime = (/* @__PURE__ */ new Date()).toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true
-  });
-  console.log(`${formattedTime} [${source}] ${message}`);
-}
-async function setupVite(app2, server) {
-  const vite = await createViteServer({
-    ...vite_config_default,
-    configFile: false,
-    customLogger: {
-      ...viteLogger,
-      error: (msg, options) => {
-        if (msg.includes("[TypeScript] Found 0 errors. Watching for file changes")) {
-          log("no errors found", "tsc");
-          return;
-        }
-        if (msg.includes("[TypeScript] ")) {
-          const [errors, summary] = msg.split("[TypeScript] ", 2);
-          log(`${summary} ${errors}\x1B[0m`, "tsc");
-          return;
-        } else {
-          viteLogger.error(msg, options);
-          process.exit(1);
-        }
-      }
-    },
-    server: {
-      middlewareMode: true,
-      hmr: { server }
-    },
-    appType: "custom",
-    root: path3.resolve(__dirname3, "../client")
-    // Ensure correct root
-  });
-  app2.use(vite.middlewares);
-  app2.use("*", async (req, res, next) => {
-    const url = req.originalUrl;
-    try {
-      const clientTemplate = path3.resolve(__dirname3, "../client/index.html");
-      const template = await fs.promises.readFile(clientTemplate, "utf-8");
-      const page = await vite.transformIndexHtml(url, template);
-      res.status(200).set({ "Content-Type": "text/html" }).end(page);
-    } catch (e) {
-      vite.ssrFixStacktrace(e);
-      next(e);
-    }
-  });
-}
-function serveStatic(app2) {
-  const distPath = path3.resolve(__dirname3, "../dist/public");
-  if (!fs.existsSync(distPath)) {
-    throw new Error(`Could not find the build directory: ${distPath}, make sure to build the client first`);
-  }
-  app2.use(express.static(distPath));
-  app2.use("*", (_req, res) => {
-    res.sendFile(path3.resolve(distPath, "index.html"));
-  });
-}
-
 // server/index.ts
 var env2 = setupEnvironment();
-console.log("\n--- Environment Setup Debug ---");
-console.log("Environment variables loaded:", env2);
-console.log("--- End Debug ---\n");
-var __filename4 = fileURLToPath4(import.meta.url);
-var __dirname4 = path4.dirname(__filename4);
-var app = express2();
-app.use(express2.json());
-app.use(express2.urlencoded({ extended: false }));
+var app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+registerRoutes(app);
 app.use((req, res, next) => {
-  const start = Date.now();
-  const requestPath = req.path;
-  let capturedJsonResponse = void 0;
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    if (requestPath.startsWith("/api")) {
-      let logLine = `${req.method} ${requestPath} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
-      if (logLine.length > 150) {
-        logLine = logLine.slice(0, 149) + "\u2026";
-      }
-      log(logLine);
-    }
-  });
+  res.setHeader("Content-Type", "application/json");
   next();
 });
-(async () => {
-  try {
-    console.log("\u{1F680} Registering API Routes...");
-    registerRoutes(app);
-    console.log("\u2705 Routes registered successfully.");
-    app.use((err, _req, res, _next) => {
-      console.error("\u274C API ERROR:", err);
-      res.status(err.status || 500).json({
-        error: err.message || "Internal Server Error",
-        stack: process.env.NODE_ENV === "production" ? err.stack : void 0
-      });
-    });
-    if (app.get("env") === "production") {
-      console.log("\u{1F6E0} Setting up Vite (Production Mode)...");
-      const server = app.listen(0);
-      await setupVite(app, server);
-      console.log("\u2705 Vite setup complete.");
-    } else {
-      console.log("\u{1F4E6} Serving Static Files...");
-      serveStatic(app);
-    }
-    const PORT = 3e3;
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`\u2705 Server running on http://localhost:${PORT}`);
-    });
-  } catch (error) {
-    console.error("\u{1F525} Server Initialization Failed:", error);
-    process.exit(1);
-  }
-})();
+var PORT = process.env.PORT || 3e3;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+var index_default = app;
+export {
+  index_default as default
+};

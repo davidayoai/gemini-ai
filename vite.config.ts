@@ -8,6 +8,11 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 export default defineConfig({
+  server: {
+    proxy: {
+      '/api': 'http://localhost:3000', // Adjust based on your API server
+    },
+  },
   plugins: [react(), runtimeErrorOverlay(), themePlugin()],
   resolve: {
     alias: {
