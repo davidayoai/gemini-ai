@@ -2,7 +2,7 @@ import { setupEnvironment } from "./env";
 import path from "path";
 import { fileURLToPath } from "url";
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";  // Ensure the path is correct
+import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 // Load environment variables
@@ -54,7 +54,7 @@ app.use((req, res, next) => {
 (async () => {
   try {
     console.log("🚀 Registering API Routes...");
-    registerRoutes();
+    registerRoutes(app);
     console.log("✅ Routes registered successfully.");
 
     // Global Error Handling Middleware
@@ -76,7 +76,7 @@ app.use((req, res, next) => {
     }
 
     // Start the Server on Port 3000
-    const PORT = 5173;
+    const PORT = 3000;
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`✅ Server running on http://localhost:${PORT}`);
     });
