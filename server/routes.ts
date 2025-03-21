@@ -1,5 +1,6 @@
 import { createServer } from "http";
-import { GoogleGenerativeAI, } from "@google/generative-ai";
+import { Express } from "express";
+import { GoogleGenerativeAI, GroundingSupport, } from "@google/generative-ai";
 import { marked } from "marked";
 import { setupEnvironment } from "./env";
 const env = setupEnvironment();
@@ -48,11 +49,11 @@ async function formatResponseToMarkdown(text: string) {
     // Convert markdown to HTML using marked
     return marked.parse(formatted);
 }
-export function registerRoutes(app) {
+export function registerRoutes(app: Express) {
     // Search endpoint - creates a new chat session
     app.get("/api/search", async (req, res) => {
         try {
-            const query = req.query.q;
+            const query = typeof req.query.q === "string" ? req.query.q : Array.isArray(req.query.q) ? req.query.q.join(" ") : "";
             if (!query) {
                 return res.status(400).json({
                     message: "Query parameter 'q' is required",
@@ -68,7 +69,7 @@ export function registerRoutes(app) {
                 ],
             });
             // Generate content with search tool
-            const result = await chat.sendMessage(query);
+            const result = await chat.sendMessage(query as string);
             const response = await result.response;
             console.log("Raw Google API Response:", JSON.stringify({
                 text: response.text(),
@@ -85,14 +86,19 @@ export function registerRoutes(app) {
             if (metadata) {
                 const chunks = metadata.groundingChunks || [];
                 const supports = metadata.groundingSupports || [];
-                chunks.forEach((chunk, index) => {
+                chunks.forEach((chunk: { web?: { uri?: string; title?: string } }, index) => {
                     if (chunk.web?.uri && chunk.web?.title) {
                         const url = chunk.web.uri;
                         if (!sourceMap.has(url)) {
                             // Find snippets that reference this chunk
                             const snippets = supports
-                                .filter((support) => support.groundingChunkIndices.includes(index))
-                                .map((support) => support.segment.text)
+                                .filter((support) => (support.groundingChunckIndices ?? []).includes(index))
+                                .map((support: GroundingSupport) => {
+                                    if (typeof support.segment === "object" && support.segment?.text) {
+                                        return (support.segment as { text?: string }).text || "";
+                                    }
+                                    return "";
+                                })
                                 .join(" ");
                             sourceMap.set(url, {
                                 title: chunk.web.title,
@@ -116,7 +122,7 @@ export function registerRoutes(app) {
         catch (error) {
             console.error("Search error:", error);
             res.status(500).json({
-                message: error.message || "An error occurred while processing your search",
+                message: (error instanceof Error ? error.message : "Unknown error") || "An error occurred while processing your search",
             });
         }
     });
@@ -153,14 +159,28 @@ export function registerRoutes(app) {
             if (metadata) {
                 const chunks = metadata.groundingChunks || [];
                 const supports = metadata.groundingSupports || [];
-                chunks.forEach((chunk, index) => {
+                interface GroundingChunk {
+                    web?: {
+                        uri?: string;
+                        title?: string;
+                    };
+                }
+
+                interface GroundingSupport {
+                    groundingChunckIndices: number[];
+                    segment?: {
+                        text?: string;
+                    } | null;
+                }
+
+                chunks.forEach((chunk: GroundingChunk, index: number) => {
                     if (chunk.web?.uri && chunk.web?.title) {
                         const url = chunk.web.uri;
                         if (!sourceMap.has(url)) {
                             // Find snippets that reference this chunk
                             const snippets = supports
-                                .filter((support) => support.groundingChunkIndices.includes(index))
-                                .map((support) => support.segment.text)
+                                .filter((support: GroundingSupport) => support.groundingChunckIndices.includes(index))
+                                .map((support: GroundingSupport) => support.segment?.text || "")
                                 .join(" ");
                             sourceMap.set(url, {
                                 title: chunk.web.title,

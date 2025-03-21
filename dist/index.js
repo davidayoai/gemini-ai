@@ -67,7 +67,7 @@ async function formatResponseToMarkdown(text) {
 function registerRoutes(app2) {
   app2.get("/api/search", async (req, res) => {
     try {
-      const query = req.query.q;
+      const query = typeof req.query.q === "string" ? req.query.q : Array.isArray(req.query.q) ? req.query.q.join(" ") : "";
       if (!query) {
         return res.status(400).json({
           message: "Query parameter 'q' is required"
@@ -99,7 +99,12 @@ function registerRoutes(app2) {
           if (chunk.web?.uri && chunk.web?.title) {
             const url = chunk.web.uri;
             if (!sourceMap.has(url)) {
-              const snippets = supports.filter((support) => support.groundingChunkIndices.includes(index)).map((support) => support.segment.text).join(" ");
+              const snippets = supports.filter((support) => (support.groundingChunckIndices ?? []).includes(index)).map((support) => {
+                if (typeof support.segment === "object" && support.segment?.text) {
+                  return support.segment.text || "";
+                }
+                return "";
+              }).join(" ");
               sourceMap.set(url, {
                 title: chunk.web.title,
                 url,
@@ -120,7 +125,7 @@ function registerRoutes(app2) {
     } catch (error) {
       console.error("Search error:", error);
       res.status(500).json({
-        message: error.message || "An error occurred while processing your search"
+        message: (error instanceof Error ? error.message : "Unknown error") || "An error occurred while processing your search"
       });
     }
   });
@@ -156,7 +161,7 @@ function registerRoutes(app2) {
           if (chunk.web?.uri && chunk.web?.title) {
             const url = chunk.web.uri;
             if (!sourceMap.has(url)) {
-              const snippets = supports.filter((support) => support.groundingChunkIndices.includes(index)).map((support) => support.segment.text).join(" ");
+              const snippets = supports.filter((support) => support.groundingChunckIndices.includes(index)).map((support) => support.segment?.text || "").join(" ");
               sourceMap.set(url, {
                 title: chunk.web.title,
                 url,
@@ -189,7 +194,7 @@ import path3, { dirname as dirname2 } from "path";
 import { fileURLToPath as fileURLToPath3 } from "url";
 import { createServer as createViteServer, createLogger } from "vite";
 
-// vite.config.js
+// vite.config.ts
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import themePlugin from "@replit/vite-plugin-shadcn-theme-json";
@@ -323,12 +328,13 @@ app.use((req, res, next) => {
       console.error("\u274C API ERROR:", err);
       res.status(err.status || 500).json({
         error: err.message || "Internal Server Error",
-        stack: process.env.NODE_ENV === "production" ? err.stack : void 0
+        stack: process.env.NODE_ENV === "development" ? err.stack : void 0
       });
     });
-    if (app.get("env") === "production") {
+    if (app.get("env") === "development") {
       console.log("\u{1F6E0} Setting up Vite (Production Mode)...");
-      await setupVite(app);
+      const server = app.listen(0);
+      await setupVite(app, server);
       console.log("\u2705 Vite setup complete.");
     } else {
       console.log("\u{1F4E6} Serving Static Files...");

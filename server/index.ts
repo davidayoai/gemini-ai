@@ -62,13 +62,14 @@ app.use((req, res, next) => {
       console.error("❌ API ERROR:", err);
       res.status(err.status || 500).json({
         error: err.message || "Internal Server Error",
-        stack: process.env.NODE_ENV === "production" ? err.stack : undefined,
+        stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
       });
     });
 
-    if (app.get("env") === "production") {
+    if (app.get("env") === "development") {
       console.log("🛠 Setting up Vite (Production Mode)...");
-      await setupVite(app);
+      const server = app.listen(0); // Create a server instance
+      await setupVite(app, server);
       console.log("✅ Vite setup complete.");
     } else {
       console.log("📦 Serving Static Files...");
