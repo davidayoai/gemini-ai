@@ -183,12 +183,11 @@ var vite_config_default = defineConfig({
     alias: {
       "@db": path2.resolve(__dirname2, "db"),
       "@": path2.resolve(__dirname2, "client/src")
-      // Keep alias structure consistent
     }
   },
   root: path2.resolve(__dirname2, "client"),
   build: {
-    outDir: path2.resolve(__dirname2, "dist/public"),
+    outDir: path2.resolve(__dirname2, "client/dist"),
     emptyOutDir: true,
     target: "esnext"
     // Ensures modern JavaScript support

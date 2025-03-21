@@ -13,12 +13,16 @@ export default defineConfig({
   resolve: {
     alias: {
       "@db": path.resolve(__dirname, "db"),
-      "@": path.resolve(__dirname, "client/src"), // Keep alias structure consistent
-    },
+      "@": path.resolve(__dirname, "client/src"),
+    }
+
   },
+
+
+
   root: path.resolve(__dirname, "client"),
   build: {
-    outDir: path.resolve(__dirname, "dist/public"),
+    outDir: path.resolve(__dirname, "client/dist"),
     emptyOutDir: true,
     target: "esnext", // Ensures modern JavaScript support
   },

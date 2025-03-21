@@ -1,12 +1,12 @@
 import { useEffect, useRef } from 'react';
-import { Card } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card } from '../components/ui/card';
+import { Alert, AlertDescription } from '../components/ui/alert';
 import { AlertCircle } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
+import { Skeleton } from '../components/ui/skeleton';
+import { cn } from '../lib/utils';
 import { motion } from 'framer-motion';
-import { SourceList } from '@/components/SourceList';
-import { Logo } from '@/components/Logo';
+import { SourceList } from '../components/SourceList';
+import { Logo } from '../components/Logo';
 
 interface SearchResultsProps {
   query: string;

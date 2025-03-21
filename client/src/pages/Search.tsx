@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { SearchInput } from '@/components/SearchInput';
-import { SearchResults } from '@/components/SearchResults';
-import { FollowUpInput } from '@/components/FollowUpInput';
-import { Button } from '@/components/ui/button';
+import { SearchInput } from '../components/SearchInput';
+import { SearchResults } from '../components/SearchResults';
+import { FollowUpInput } from '../components/FollowUpInput';
+import { Button } from '../components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SourceList } from '@/components/SourceList';
+import { SourceList } from '../components/SourceList';
 
 export function Search() {
   const [location, setLocation] = useLocation();

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useLocation } from 'wouter';
 import { Search } from 'lucide-react';
-import { ThemeToggle } from '@/components/ThemeToggle';
-import { Logo } from '@/components/Logo';
+import { ThemeToggle } from '../components/ThemeToggle';
+import { Logo } from '../components/Logo';
 
 export function Home() {
   const [query, setQuery] = useState('');

@@ -1,5 +1,5 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
+import { ScrollArea } from "../components/ui/scroll-area";
 import { ExternalLink } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 

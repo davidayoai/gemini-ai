@@ -1,8 +1,9 @@
 import { useState, KeyboardEvent } from 'react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Input } from '../components/ui/input';
+
+import { Button } from '../components/ui/button';
 import { MessageSquarePlus, Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '../lib/utils';
 
 interface FollowUpInputProps {
   onSubmit: (query: string) => void;

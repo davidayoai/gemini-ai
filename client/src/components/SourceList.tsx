@@ -1,7 +1,7 @@
-import { Card } from '@/components/ui/card';
+import { Card } from '../components/ui/card';
 import { ExternalLink, Link2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "../components/ui/scroll-area";
 
 interface Source {
   title: string;

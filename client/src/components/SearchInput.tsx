@@ -1,8 +1,8 @@
 import { useState, KeyboardEvent } from 'react';
-import { Textarea } from '@/components/ui/textarea'; // Use Textarea instead of Input
-import { Button } from '@/components/ui/button';
+import { Textarea } from '../components/ui/textarea'; // Use Textarea instead of Input
+import { Button } from '../components/ui/button';
 import { Search, Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '../lib/utils';
 
 interface SearchInputProps {
   onSearch: (query: string) => void;
