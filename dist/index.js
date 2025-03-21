@@ -183,30 +183,32 @@ var vite_config_default = defineConfig({
     alias: {
       "@db": path2.resolve(__dirname2, "db"),
       "@": path2.resolve(__dirname2, "client/src")
+      // Ensure alias is correct
     }
   },
   root: path2.resolve(__dirname2, "client"),
+  // Ensures Vite serves from the correct folder
   build: {
     outDir: path2.resolve(__dirname2, "client/dist"),
+    // ✅ Store the build in client/dist
     emptyOutDir: true,
     target: "esnext"
-    // Ensures modern JavaScript support
   },
   server: {
     port: 3e3,
-    // Set development server port
+    // ✅ Standard Vite React port
     strictPort: true,
-    // Prevents conflicts with other apps
-    host: true,
-    // Allows network access for mobile/devices
+    host: "localhost",
+    // Prevents external access
     watch: {
       usePolling: true
-      // Fixes issues with file watching in some environments
-    }
+      // Fix for file-watching issues
+    },
+    open: true
+    // Auto-opens the browser on start
   },
   esbuild: {
     jsxInject: void 0
-    // Prevents auto-injecting React if manually imported
   }
 });
 
@@ -331,7 +333,7 @@ app.use((req, res, next) => {
       console.log("\u{1F4E6} Serving Static Files...");
       serveStatic(app);
     }
-    const PORT = 3e3;
+    const PORT = 5173;
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`\u2705 Server running on http://localhost:${PORT}`);
     });
