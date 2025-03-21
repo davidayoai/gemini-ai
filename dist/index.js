@@ -19,7 +19,7 @@ function setupEnvironment() {
   }
   return {
     GOOGLE_API_KEY: process.env.GOOGLE_API_KEY || "AIzaSyDEPEgUlqSxhWtZ30lBoQYKIMX8U0fwZlA",
-    NODE_ENV: process.env.NODE_ENV || "development"
+    NODE_ENV: process.env.NODE_ENV || "production"
   };
 }
 
@@ -189,7 +189,7 @@ import path3, { dirname as dirname2 } from "path";
 import { fileURLToPath as fileURLToPath3 } from "url";
 import { createServer as createViteServer, createLogger } from "vite";
 
-// vite.config.ts
+// vite.config.js
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import themePlugin from "@replit/vite-plugin-shadcn-theme-json";
@@ -199,7 +199,6 @@ import { fileURLToPath as fileURLToPath2 } from "url";
 var __filename2 = fileURLToPath2(import.meta.url);
 var __dirname2 = dirname(__filename2);
 var vite_config_default = defineConfig({
-  assetsInclude: ["**/*.html"],
   plugins: [react(), runtimeErrorOverlay(), themePlugin()],
   resolve: {
     alias: {
@@ -211,12 +210,6 @@ var vite_config_default = defineConfig({
   build: {
     outDir: path2.resolve(__dirname2, "dist/public"),
     emptyOutDir: true
-  },
-  server: {
-    port: 3e3,
-    // Specify a development server port if needed
-    host: true
-    // Allows access from network devices (optional)
   }
 });
 
@@ -330,11 +323,11 @@ app.use((req, res, next) => {
       console.error("\u274C API ERROR:", err);
       res.status(err.status || 500).json({
         error: err.message || "Internal Server Error",
-        stack: process.env.NODE_ENV === "development" ? err.stack : void 0
+        stack: process.env.NODE_ENV === "production" ? err.stack : void 0
       });
     });
-    if (app.get("env") === "development") {
-      console.log("\u{1F6E0} Setting up Vite (Development Mode)...");
+    if (app.get("env") === "production") {
+      console.log("\u{1F6E0} Setting up Vite (Production Mode)...");
       await setupVite(app);
       console.log("\u2705 Vite setup complete.");
     } else {
