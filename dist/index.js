@@ -7,22 +7,18 @@ import path from "path";
 import { fileURLToPath } from "url";
 var __filename = fileURLToPath(import.meta.url);
 var __dirname = path.dirname(__filename);
-var envPath = path.resolve(__dirname, "../.env");
+if (process.env.NODE_ENV !== "production") {
+  dotenv.config({ path: path.resolve(__dirname, "../.env") });
+}
 function setupEnvironment() {
-  const result = dotenv.config({ path: envPath });
-  if (result.error) {
-    throw new Error(
-      `Failed to load .env file from ${envPath}: ${result.error.message}`
-    );
-  }
-  if (!process.env.GOOGLE_API_KEY) {
-    throw new Error(
-      "GOOGLE_API_KEY environment variable must be set in .env file"
-    );
+  const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
+  const NODE_ENV = process.env.NODE_ENV || "production";
+  if (!GOOGLE_API_KEY) {
+    throw new Error("Missing GOOGLE_API_KEY in environment variables.");
   }
   return {
-    GOOGLE_API_KEY: process.env.GOOGLE_API_KEY || "AIzaSyDEPEgUlqSxhWtZ30lBoQYKIMX8U0fwZlA",
-    NODE_ENV: process.env.NODE_ENV || "production"
+    GOOGLE_API_KEY,
+    NODE_ENV
   };
 }
 

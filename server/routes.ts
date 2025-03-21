@@ -3,6 +3,7 @@ import { Express } from "express";
 import { GoogleGenerativeAI, GroundingSupport, } from "@google/generative-ai";
 import { marked } from "marked";
 import { setupEnvironment } from "./env";
+
 const env = setupEnvironment();
 const genAI = new GoogleGenerativeAI(env.GOOGLE_API_KEY);
 const model = genAI.getGenerativeModel({
