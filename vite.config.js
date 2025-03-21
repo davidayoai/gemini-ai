@@ -7,10 +7,7 @@ import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
 export default defineConfig({
-  assetsInclude: ["**/*.html"],
-
   plugins: [react(), runtimeErrorOverlay(), themePlugin()],
   resolve: {
     alias: {
@@ -22,11 +19,5 @@ export default defineConfig({
   build: {
     outDir: path.resolve(__dirname, "dist/public"),
     emptyOutDir: true,
-
-  },
-  server: {
-    port: 3000, // Specify a development server port if needed
-    host: true, // Allows access from network devices (optional)
-
   },
 });
