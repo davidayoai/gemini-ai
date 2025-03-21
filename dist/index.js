@@ -300,7 +300,7 @@ app.use((req, res, next) => {
   const requestPath = req.path;
   let capturedJsonResponse = void 0;
   const originalResJson = res.json;
-  res.json = function(bodyJson, ...args) {
+  res.json = function (bodyJson, ...args) {
     capturedJsonResponse = bodyJson;
     return originalResJson.apply(res, [bodyJson, ...args]);
   };
@@ -328,10 +328,10 @@ app.use((req, res, next) => {
       console.error("\u274C API ERROR:", err);
       res.status(err.status || 500).json({
         error: err.message || "Internal Server Error",
-        stack: process.env.NODE_ENV === "development" ? err.stack : void 0
+        stack: process.env.NODE_ENV === "production" ? err.stack : void 0
       });
     });
-    if (app.get("env") === "development") {
+    if (app.get("env") === "production") {
       console.log("\u{1F6E0} Setting up Vite (Production Mode)...");
       const server = app.listen(0);
       await setupVite(app, server);
