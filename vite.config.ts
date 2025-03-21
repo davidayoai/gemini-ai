@@ -13,26 +13,25 @@ export default defineConfig({
   resolve: {
     alias: {
       "@db": path.resolve(__dirname, "db"),
-      "@": path.resolve(__dirname, "client/src"),
+      "@": path.resolve(__dirname, "client/src"), // Ensure alias is correct
     }
-
   },
-
-  root: path.resolve(__dirname, "client"),
+  root: path.resolve(__dirname, "client"), // Ensures Vite serves from the correct folder
   build: {
-    outDir: path.resolve(__dirname, "dist/public"),
+    outDir: path.resolve(__dirname, "client/dist"), // ✅ Store the build in client/dist
     emptyOutDir: true,
-    target: "esnext", // Ensures modern JavaScript support
+    target: "esnext",
   },
   server: {
-    port: 3000, // Set development server port
-    strictPort: true, // Prevents conflicts with other apps
-    host: true, // Allows network access for mobile/devices
+    port: 3000, // ✅ Standard Vite React port
+    strictPort: true,
+    host: "localhost", // Prevents external access
     watch: {
-      usePolling: true, // Fixes issues with file watching in some environments
+      usePolling: true, // Fix for file-watching issues
     },
+    open: true, // Auto-opens the browser on start
   },
   esbuild: {
-    jsxInject: undefined, // Prevents auto-injecting React if manually imported
+    jsxInject: undefined,
   },
 });

@@ -76,7 +76,7 @@ app.use((req, res, next) => {
     }
 
     // Start the Server on Port 3000
-    const PORT = 3000;
+    const PORT = 5173;
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`✅ Server running on http://localhost:${PORT}`);
     });
